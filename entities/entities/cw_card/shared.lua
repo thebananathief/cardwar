@@ -12,8 +12,8 @@ ENT.AdminSpawnable = false
 
 function ENT:SetupDataTables()
     self:NetworkVar("String", 0, "cwName")
-    self:NetworkVar("Int", 0, "cwType")
-    self:NetworkVar("String", 1, "cwId")
+    self:NetworkVar("Int", 0, "cwUnique")
+    self:NetworkVar("String", 1, "cwClass")
     self:NetworkVar("Int", 1, "cwHp")
     self:NetworkVar("String", 3, "cwIcon")
     self:NetworkVar("String", 2, "cwDesc")
@@ -23,8 +23,8 @@ function ENT:SetupDataTables()
     if SERVER then
         sCard = cards[math.random(#cards)]
         self:SetcwName(sCard.name)
-        self:SetcwType(sCard.type)
-        self:SetcwId(sCard.id)
+        self:SetcwUnique(sCard.unique)
+        self:SetcwClass(sCard.class)
         self:SetcwHp(sCard.hp)
         self:SetcwIcon(sCard.icon)
         self:SetcwDesc(sCard.desc)
