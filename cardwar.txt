@@ -1,0 +1,28 @@
+"cardwar"
+{
+	"base"		"sandbox"
+	"title"		"Card War"
+	"maps"		"^cw_"
+	"menusystem"	"2"
+	"workshopid"	""
+
+	"settings"
+	{
+		1
+		{
+			"name"		"sbox_noclip"
+			"text"		"noclip"
+			"help"		"If enabled, players will be able to use noclip"
+			"type"		"CheckBox"
+			"default"	"0"
+		}
+		2
+		{
+			"name"		"ai_ignoreplayers"
+			"text"		"ignoreplayers"
+			"help"		"If turned off, npcs will attack players"
+			"type"		"CheckBox"
+			"default"	"1"
+		}
+	}
+}
