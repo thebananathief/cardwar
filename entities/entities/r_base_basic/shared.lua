@@ -255,7 +255,7 @@ end
 
 function ENT:FindEnemy()
 	if self:P_IsPossessed() then return end
-	if GetConVar("ai_disable"):GetInt() == 1 then return end
+	if GetConVar("ai_disabled"):GetInt() == 1 then return end
 	local _ents = ents.FindInSphere(self:GetPos(), self.SearchRadius or 2048)
 
 	for k, v in pairs(_ents) do
@@ -431,10 +431,7 @@ function ENT:RunBehaviour()
 				coroutine.yield()
 			end
 		else
-			local ai_dis = GetConVar("ai_disable"):GetInt() < 1
-			local ai_igpl = GetConVar("ai_ignoreplayers"):GetInt() < 1
-
-			if ai_dis or ai_igpl then
+			if GetConVar("ai_disabled"):GetInt() < 1 or GetConVar("ai_ignoreplayers"):GetInt() < 1 then
 				self:CustomRunBehaviour()
 
 				if (self:HaveEnemy()) then

@@ -75,7 +75,6 @@ function ENT:FootSteps()
 end
 
 function ENT:CustomIdle()
-	print("wow")
 	self:MovementFunctions(self.IdleAnim, 0)
 end
 
@@ -86,7 +85,7 @@ end
 
 	function ENT:PrimaryAttack()
 		self.loco:SetDesiredSpeed(0)
-		self:attackMelee(self:GetEnemy(), 1, self.AttackAnim, true, self.Damage, "weapons/iceaxe/iceaxe_swing1.wav")
+		
 	end
 
 	function ENT:CustomKilled(dmginfo)
