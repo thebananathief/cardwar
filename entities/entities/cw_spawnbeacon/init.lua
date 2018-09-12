@@ -46,6 +46,7 @@ function ENT:SpawnTeam()
 		ent:SetPos(tr.HitPos + Vector(0, 0, 16))
 		ent:SetAngles(self:GetAngles())
 
+		print(self:GetcwTeam())
 		if (self:GetcwTeam() == 0) then
 			table.insert(npcsRed, ent)
 		else

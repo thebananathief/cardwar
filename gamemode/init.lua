@@ -134,6 +134,8 @@ hook.Add("OnNPCKilled", "NPC Death Function", function(npc, attacker, inflictor)
 
 	if roundInProg then
 		local ended = false
+		PrintTable(npcsRed)
+		PrintTable(npcsBlue)
 		if #npcsRed < 1 and !ended then
 			ended = true
 			timer.Simple(2, function()
