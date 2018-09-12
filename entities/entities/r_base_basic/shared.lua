@@ -259,9 +259,8 @@ function ENT:FindEnemy()
 	local _ents = ents.FindInSphere(self:GetPos(), self.SearchRadius or 2048)
 
 	for k, v in pairs(_ents) do
-		if (type(v) == "NextBot") and v:Health() > 0 and self:GetcwTeam() ~= v:GetcwTeam() then
+		if (type(v) == "NextBot") and v:Health() > 0 and self:GetcwTeam() != v:GetcwTeam() then
 			self:SetEnemy(v)
-
 			return true
 		end
 	end
@@ -431,21 +430,11 @@ function ENT:RunBehaviour()
 				coroutine.yield()
 			end
 		else
-			if GetConVar("ai_disabled"):GetInt() < 1 or GetConVar("ai_ignoreplayers"):GetInt() < 1 then
-				self:CustomRunBehaviour()
+			self:CustomRunBehaviour()
 
-				if (self:HaveEnemy()) then
-					if self:GetRangeTo(self:GetEnemy()) < self.AttackRange then
-						self:CustomIdle()
-					else
-						self:MovementFunctions(self.WalkAnim, self.Speed)
-					end
-
-					self:ChaseEnemy()
-				else
-					self:CustomIdle()
-					self:FindEnemy()
-				end
+			if (self:HaveEnemy()) then
+				self:MovementFunctions(self.WalkAnim, self.Speed)
+				self:ChaseEnemy()
 			else
 				self:CustomIdle()
 				self:FindEnemy()
@@ -822,10 +811,12 @@ function ENT:MovementFunctions(seq, speed, cycle, playbackrate)
 		cycle = 0
 	end
 
-	self:SetSequence(seq)
-	self:SetCycle(cycle)
-	self:SetPlaybackRate(playbackrate)
-	self.loco:SetDesiredSpeed(speed)
+	if self:GetSequence() != seq then
+		self:ResetSequence(seq)
+		self:SetCycle(cycle)
+		self:SetPlaybackRate(playbackrate)
+		self.loco:SetDesiredSpeed(speed)
+	end
 end
 
 function CreateBeamParticle(pcf, pos1, pos2, ang1, ang2, parent, candie, dietime)
@@ -962,7 +953,7 @@ function ENT:Helper_SafeTimer(delay, func)
 	end)
 end
 
-function ENT:attackMelee(victim, delay, sequence, ShouldStop, damage, hitsound)
+function ENT:Melee_Attack(victim, delay, sequence, ShouldStop, damage, hitsound)
 	if self.NextAttack then return end
 	self.NextAttack = true
 	local v = victim

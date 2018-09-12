@@ -20,7 +20,7 @@ end
 ENT.Model = "models/player/magnusson.mdl"
 ENT.health = 100
 ENT.Damage = 10
-ENT.AttackRange = 200
+ENT.AttackRange = 150
 ENT.AttackInterval = 1
 ENT.Speed = 100
 -- Animations --
@@ -84,8 +84,8 @@ end
 	end
 
 	function ENT:PrimaryAttack()
-		self.loco:SetDesiredSpeed(0)
-		
+		self:MovementFunctions(self.AttackAnim, 0)
+		self:Melee_Attack()
 	end
 
 	function ENT:CustomKilled(dmginfo)

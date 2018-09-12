@@ -133,15 +133,24 @@ hook.Add("OnNPCKilled", "NPC Death Function", function(npc, attacker, inflictor)
 	end
 
 	if roundInProg then
-		if #npcsRed <= 0 then
-			timer.Simple(3, EndRound)
+		local ended = false
+		if #npcsRed < 1 and !ended then
+			ended = true
+			timer.Simple(2, function()
+				EndRound()
+				ended = false
+			end)
 			team.AddScore(1, 1)
 
 			for k, v in pairs(player.GetAll()) do
 				v:SendLua("chat.AddText(Color(255,255,255), 'Blue Team has won the round!')")
 			end
-		elseif #npcsBlue <= 0 then
-			timer.Simple(3, EndRound)
+		elseif #npcsBlue < 1 and !ended then
+			ended = true
+			timer.Simple(2, function()
+				EndRound()
+				ended = false
+			end)
 			team.AddScore(0, 1)
 
 			for k, v in pairs(player.GetAll()) do
