@@ -134,8 +134,6 @@ hook.Add("OnNPCKilled", "NPC Death Function", function(npc, attacker, inflictor)
 
 	if roundInProg then
 		local ended = false
-		PrintTable(npcsRed)
-		PrintTable(npcsBlue)
 		if #npcsRed < 1 and !ended then
 			ended = true
 			timer.Simple(2, function()
@@ -211,7 +209,6 @@ end
 hook.Add("KeyPress", "Keypress Functions", function(ply, key)
 	if (key == IN_RELOAD) then
 		local ent = ents.Create("cw_card")
-		if (not IsValid(ent)) then return end
 		local trace = ply:GetEyeTrace()
 		ent:SetPos(trace.HitPos + Vector(0, 0, 50))
 		ent:Spawn()
@@ -270,5 +267,10 @@ hook.Add("PlayerButtonDown", "PlayerButtonDown Functions", function(ply, button)
 		else
 			ply:SetTeam(0)
 		end
+	end
+
+	if (button == KEY_Q) then
+		PrintTable(npcsRed)
+		PrintTable(npcsBlue)
 	end
 end)

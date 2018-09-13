@@ -38,10 +38,10 @@ function GM:SpawnMenuOpen()
 end
 
 function GM:HUDPaint()
-  surface.SetDrawColor(255, 0, 20, 255)
+  surface.SetDrawColor(200, 0, 0, 255)
   surface.DrawRect(ScrW() / 2 - 220, 0, 160, 45)
   draw.Circle(ScrW() / 2 - 220, 0, 45, 30)
-  surface.SetDrawColor(20, 0, 255, 255)
+  surface.SetDrawColor(0, 0, 200, 255)
   surface.DrawRect(ScrW() / 2 + 87, 0, 130, 45)
   draw.Circle(ScrW() / 2 + 220, 0, 45, 30)
   surface.SetDrawColor(0, 0, 0, 255)

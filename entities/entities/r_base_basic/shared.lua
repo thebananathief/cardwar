@@ -32,7 +32,7 @@ function ENT:SetupDataTables()
 	self:NetworkVar("Int", 0, "cwTeam")
 
 	if SERVER then
-		self:SetcwTeam(math.random(0, 1))
+		self:SetcwTeam(0)
 	end
 end
 
@@ -207,7 +207,7 @@ function ENT:Initialize()
 	self.Interval = self.FootStepInterval
 	self:CustomInit()
 	self:SetCollisionBounds(Vector(-4, -4, 0), Vector(4, 4, 64))
-	self:SetCollisionGroup(COLLISION_GROUP_WORLD)
+	self:SetCollisionGroup(COLLISION_GROUP_NPC)
 	self:SetHealth(self.health)
 	self:SetModel(self.Model)
 	self.LoseTargetDist = 5000
@@ -279,18 +279,18 @@ function ENT:Think()
 		self.loco:FaceTowards(self:P_GetPossessor():GetPos() + self:P_GetPossessor():GetForward() * 100)
 	end
 
-	if (self:GetEnemy() and self:GetEnemy():IsValid() and self:Health() > 0 and self:GetEnemy():Health() > 0) then
+	if not IsValid(self) then return end
+	if (self:GetEnemy() and self:Health() > 0 and self:GetEnemy():Health() > 0) then
 		if self:GetRangeTo(self:GetEnemy():GetPos()) > self.AttackRange then return end
 		if self.NextAttack then return end
 		self.NextAttack = true
 		self:PrimaryAttack()
 
 		timer.Simple(self.AttackInterval, function()
+			self:CheckValid()
 			self.NextAttack = false
 		end)
 	end
-
-	if not IsValid(self) then return end
 	self:CustomThink()
 
 	if tobool(self.UseFootSteps) then
@@ -769,7 +769,7 @@ function ENT:CreateRelationShip()
 		table.Add(ents)
 
 		for _, v in pairs(_ents) do
-			if v:GetClass() ~= self and v:GetClass() ~= "npc_bullseye" and v:GetClass() ~= "npc_grenade_frag" and v:IsNPC() then
+			if v:GetClass() != self and v:GetClass() != "npc_bullseye" and v:GetClass() != "npc_grenade_frag" and v:IsNPC() then
 				v:AddEntityRelationship(bullseye, 1, 10)
 			end
 		end
@@ -897,22 +897,6 @@ function P_Possess(play, nextbot, delay)
 		ErrorNoHalt("[R-Base Developer Error](P_Possess) function has incomplete arguments.")
 	end
 end
-function ENT:Helper_PuntProp(prop, delay, force)
-	force = force or 100000
-
-	timer.Simple(delay, function()
-		if not IsValid(self) then return end
-		if not IsValid(prop) then return end
-		prop:EmitSound("npc/zombie/zombie_pound_door.wav")
-		prop:TakeDamage(force * 10)
-		local physicsObject = prop:GetPhysicsObject()
-
-		if (IsValid(physicsObject)) then
-			if IsValid(self) then return end
-			physicsObject:ApplyForceCenter((prop:GetPos() - self:GetPos()):GetNormal() * force)
-		end
-	end)
-end
 
 function ENT:GiveWeapon(class)
 	local wep = ents.Create(class)
@@ -953,47 +937,15 @@ function ENT:Helper_SafeTimer(delay, func)
 	end)
 end
 
-function ENT:Melee_Attack(victim, delay, sequence, ShouldStop, damage, hitsound)
-	if self.NextAttack then return end
-	self.NextAttack = true
+function ENT:Melee_Attack(victim, delay, damage)
 	local v = victim
-	if not IsValid(v) then return end
+	self:CheckValid(v)
 
 	if ((type(v) == "NextBot" or v:IsNPC() or v:IsPlayer()) and (v:Health() > 0)) then
-		self.loco:FaceTowards(v:GetPos())
-		local seq, dur = self:LookupSequence(sequence)
-
-		if ShouldStop then
-			self:MovementFunctions(seq, 0)
-
 			timer.Simple(delay, function()
-				if not self:IsValid() then return false end
-				self:MovementFunctions(self.WalkAnim, self.Speed)
-				self.NextAttack = false
-			end)
-
-			v:EmitSound(hitsound)
-
-			timer.Simple(dur - 0.5, function()
-				if not v:IsValid() then return false end
+				self:CheckValid(v)
 				v:TakeDamage(damage, self)
 			end)
-		else
-			self:MovementFunctions(seq, self.Speed)
-
-			timer.Simple(delay, function()
-				if not self:IsValid() then return false end
-				self:MovementFunctions(self.WalkAnim, self.Speed)
-				self.NextAttack = false
-			end)
-
-			v:EmitSound(hitsound)
-
-			timer.Simple(dur - 0.5, function()
-				if not v:IsValid() then return false end
-				v:TakeDamage(damage, self)
-			end)
-		end
 	end
 end
 

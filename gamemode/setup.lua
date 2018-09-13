@@ -17,6 +17,16 @@ cards = {
     icon = "cable/green",
     desc = "•Moderate Health\n•Moderate Damage\n•High Mobility",
     quan = 2
+  },
+
+  {
+    name = "Doctor Hax",
+    unique = 0,
+    class = "cw_drhax",
+    hp = 0,
+    icon = "entities/cw_card/drhax.jpg",
+    desc = "•High Health\n•High Damage\n•Moderate Mobility",
+    quan = 1
   }
 }
 
