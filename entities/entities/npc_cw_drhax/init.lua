@@ -2,11 +2,32 @@ AddCSLuaFile("cl_init.lua")
 AddCSLuaFile("shared.lua")
 include("shared.lua")
 
-list.Set("NPC", "npc_cw_drhax", {
-  Name = "Doctor Hax",
-  Class = "npc_cw_drhax",
-  Category = "Cardwar"
-})
+function ENT:Configure()
+	self.Model = "models/player/breen.mdl"
+	--	AI stuff
+	self.Hitpoints = 200
+	self.Damage = 0
+	self.AttackRange = 500
+	self.AttackInterval = 3
+	self.SightRange = 25000
+	self.Speed = 100
+	--	Weapon stuff
+	--self.PrimaryWeapon		= "weapon_demo_nadelauncher"
+end
+
+function ENT:LoadAnimations()
+	self.AnimSet = {
+		idle = "idle_all_01",
+		attack = "idle_magic",
+		run = "run_all_01"
+	}
+end
+
+function ENT:LoadSoundPack()
+	self.soundpack = {
+		attack = {"vo/npc/male01/hacks01.wav", "vo/npc/male01/hacks02.wav"}
+	}
+end
 
 function ENT:CustomInit()
 end
@@ -20,31 +41,22 @@ end
 function ENT:CustomChaseEnemy(target)
 end
 
-function ENT:FootSteps()
-end
-
-function ENT:CustomIdle()
-  self:MovementFunctions(self.IdleAnim, 0)
-end
-
 function ENT:CustomIdleSound()
 end
 
 function ENT:PrimaryAttack()
-  self:MovementFunctions(self.AttackAnim, 0)
-  self:EmitSound(self.AttackSounds[math.random(1, #self.AttackSounds)])
-  self.loco:FaceTowards(self:GetEnemy():GetPos())
-  self:ThrowComp()
+	self:MovementFunctions(self.AnimSet.attack, 0)
+	self:EmitSound(self.soundpack.attack[math.random(1, #self.soundpack.attack)])
+	self:ThrowComp()
 end
 
 function ENT:ThrowComp()
-  if !IsValid(self) then return end
-  local ent = ents.Create("proj_cw_computer")
-
-  ent:SetPos(self:LocalToWorld(Vector(70, 0, 60)))
-  ent:SetAngles(self:GetEnemy():GetAngles() - Angle(0, 180, 0))
-  ent:Spawn()
-  ent:Activate()
+	if not IsValid(self) then return end
+	local ent = ents.Create("proj_cw_computer")
+	ent:SetPos(self:LocalToWorld(Vector(70, 0, 60)))
+	ent:SetAngles(self:GetEnemy():GetAngles() - Angle(0, 180, 0))
+	ent:Spawn()
+	ent:Activate()
 end
 
 function ENT:CustomKilled(dmginfo)

@@ -6,6 +6,7 @@ function ENT:Initialize()
   self:SetModel("models/props_lab/monitor01a.mdl")
   self:PhysicsInit(SOLID_VPHYSICS)
   self:SetMoveType(MOVETYPE_VPHYSICS)
+  self:SetCollisionGroup(COLLISION_GROUP_INTERACTIVE_DEBRIS)
   self:DrawShadow(false)
   local phys = self:GetPhysicsObject()
 
@@ -14,8 +15,8 @@ function ENT:Initialize()
   end
 
   local velocity = self:GetForward()
-  velocity = velocity * 100000
-  velocity = velocity + ( VectorRand() * 10 )
+  velocity = velocity * math.Rand(100000,200000)
+  velocity = velocity + ( VectorRand() * 20000 )
   phys:ApplyForceCenter( velocity )
 
   SafeRemoveEntityDelayed(self,3)

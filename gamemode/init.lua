@@ -105,10 +105,12 @@ end
 
 function EndRound()
 	for k, v in pairs(npcsRed) do
+		if !IsValid(v) then return end
 		v:Remove()
 	end
 
 	for k, v in pairs(npcsBlue) do
+		if !IsValid(v) then return end
 		v:Remove()
 	end
 

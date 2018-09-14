@@ -55,7 +55,7 @@ function ENT:PhysicsCollide(data)
   local ent = data.HitEntity
 
   if (ent:IsValid() and not timey) and (ent:GetClass() == "cw_card" and #self.storage < 1 and not table.HasValue(self.storage, ent)) then
-      table.insert(self.storage, ent)
+      if table.HasValue(self.storage,ent) then table.insert(self.storage, ent) end
       DropEntityIfHeld(ent)
       ent:SetParent(self)
       ent:SetLocalPos(Vector(0, 0, 70))
