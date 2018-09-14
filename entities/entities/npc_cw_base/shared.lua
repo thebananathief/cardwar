@@ -28,14 +28,6 @@ if CLIENT then
 	language.Add("replace_this_with_the_filename_of_your_nextbot", "Basic Nextbot")
 end
 
-function ENT:SetupDataTables()
-	self:NetworkVar("Int", 0, "cwTeam")
-
-	if SERVER then
-		self:SetcwTeam(0)
-	end
-end
-
 -- Essentials --
 ENT.Model = "" -- Our model.
 ENT.health = 0 -- Our health.
@@ -136,40 +128,8 @@ end
 function ENT:CustomOnJump()
 end
 
-function ENT:P_PrimaryAttack(possessor)
-	self:P_GenericMeleeCode(possessor, 0, "", "common/null.wav")
-end
-
-function ENT:P_SecondaryAttack(possessor)
-end
-
-function ENT:P_Jump(possessor)
-end
-
-function ENT:P_Reload(possessor)
-end
-
-function ENT:P_Sprint(possessor)
-end
-
--- Default idle code as a fallback, replace as you wish.
-function ENT:P_PossessorIdle(possessor)
-	self:StartActivity(ACT_IDLE)
-	self.loco:SetDesiredSpeed(0)
-end
-
 --Helper functions - you don't need to use them but it'll probably make your life easier.
 --[[---------------------------------------------------------------------------------------
-self:P_IsPossessed()
-Returns whether we are possessed or not.
-
-self:P_GetPossessor()
-Returns the player that is possessing us, or returns nil if that player doesn't exist.
-
-self:P_GenericMeleeCode(Player possessor, Integer delay, String sequence, string SoundFile)
-Ex: self:P_GenericMeleeCode(possessor, 0.6, "attack", "common/null.wav")
-A simple default melee function for possessed nextbots, as attacking works WAY differently. You can still code your own if you want, though.
-
 self:MovementFunctions(Sequence seq, Integer speed, Integer cycle, Integer playbackrate)
 Ex: self:MovementFunctions("idle",1,0,1)
 An easier method of playing a sequence, moving at a speed, and if necessary, setting the cycle and playback rate.
@@ -177,28 +137,6 @@ An easier method of playing a sequence, moving at a speed, and if necessary, set
 CreateBeamParticle(String pcf, Vector pos1, Vector pos2, Angle ang1, Angle ang2, Entity parent, Boolean candie, Integer dietime)
 Ex: CreateBeamParticle("error",self:GetPos(),Vector(0,0,0),self:GetAngles(),Angle(0,0,0),self,false)
 Creates a particle beam. Works in a different manner to util.ParticleTracer as (you guessed it) it doesn't use TraceData.
-
-GetCenter(Entity v)
-Ex: GetCenter(self:GetEnemy())
-Returns (roughly) the center of an entity.
-
-P_Possess(Player player, Entity nextbot, Integer delay)
-Ex: P_Possess(ply, self, 0)
-Forces a player into possessing a specific nextbot. Useful if your nextbot is split up into different entities for whatever reason.
-
-self:Helper_Attack(Entity victim, Integer delay, String sequence, Bool ShouldStop, Integer Damage, Integer damageradius, String hitsound)
-Ex: self:Helper_Attack(v,0.6,"attack",true,100,150,"common/null.wav")
-Simple helper function for a basic melee attack. You can always use your own.
-
-self:Helper_PuntProp(Entity prop, Integer delay, Integer force)
-Ex: self:Helper_PuntProp(v,1,1000000)
-Simple helper function for basic prop punting.
-
-self:Helper_BreakDoor(Entity door, Integer delay)
-See above. Except for breaking down doors.
-
-self:Helper_SafeTimer(Integer delay, Function func)
-A timer.Simple that automatically checks for validity.
 ---------------------------------------------------------------------------------------]]
 
 -- Everything below this line is all default stuff that comes with the base. Feel free to delete it in your NPC.
@@ -206,7 +144,7 @@ function ENT:Initialize()
 	self.IsPossessed = false
 	self.Interval = self.FootStepInterval
 	self:CustomInit()
-	self:SetCollisionBounds(Vector(-4, -4, 0), Vector(4, 4, 64))
+	self:SetCollisionBounds(Vector(-6, -6, 0), Vector(6, 6, 64))
 	self:SetCollisionGroup(COLLISION_GROUP_NPC)
 	self:SetHealth(self.health)
 	self:SetModel(self.Model)
@@ -217,12 +155,16 @@ function ENT:Initialize()
 		self.loco:SetStepHeight(35)
 		self.loco:SetAcceleration(900)
 		self.loco:SetDeceleration(900)
-		self:SetSolidMask(MASK_NPCSOLID_BRUSHONLY)
+		self:SetSolidMask(MASK_NPCSOLID)
 	end
 
 	self.nextbot = true
 	self:CreateBullseye()
 	self.NextIdle = CurTime() + self.IdleNoiseInterval
+end
+
+function ENT:InitTeam(team)
+	self.Team = team
 end
 
 function ENT:BodyUpdate()
@@ -256,10 +198,11 @@ end
 function ENT:FindEnemy()
 	if self:P_IsPossessed() then return end
 	if GetConVar("ai_disabled"):GetInt() == 1 then return end
-	local _ents = ents.FindInSphere(self:GetPos(), self.SearchRadius or 2048)
+	local _ents = ents.FindInSphere(self:GetPos(), self.SearchRadius or 10000)
 
 	for k, v in pairs(_ents) do
-		if (type(v) == "NextBot") and v:Health() > 0 and self:GetcwTeam() != v:GetcwTeam() then
+		if (type(v) == "NextBot") and IsValid(v) and v:EntIndex() != self:EntIndex() then
+			if self.Team == v.Team then return end
 			self:SetEnemy(v)
 			return true
 		end
@@ -279,16 +222,18 @@ function ENT:Think()
 		self.loco:FaceTowards(self:P_GetPossessor():GetPos() + self:P_GetPossessor():GetForward() * 100)
 	end
 
-	if not IsValid(self) then return end
-	if (self:GetEnemy() and self:Health() > 0 and self:GetEnemy():Health() > 0) then
+	if self:GetEnemy() and IsValid(self) and IsValid(self:GetEnemy()) then
 		if self:GetRangeTo(self:GetEnemy():GetPos()) > self.AttackRange then return end
 		if self.NextAttack then return end
 		self.NextAttack = true
 		self:PrimaryAttack()
+		print(self:EntIndex())
+		print(self:GetEnemy())
 
 		timer.Simple(self.AttackInterval, function()
-			self:CheckValid()
+			if not IsValid(self) then return end
 			self.NextAttack = false
+			self:MovementFunctions(self.WalkAnim, self.Speed)
 		end)
 	end
 	self:CustomThink()
@@ -347,89 +292,6 @@ function ENT:RunBehaviour()
 	self:SpawnIn()
 
 	while (true) do
-		if self.CanBePossessed and self:P_IsPossessed() then
-			if CLIENT then continue end
-			-- self:SetNotSolid(true)
-			local ply = self:P_GetPossessor()
-
-			if IsValid(ply) then
-				local MoveToPosTable = {}
-				MoveToPosTable.lookahead = 300
-				-- MoveToPosTable.tolerance = 100
-				MoveToPosTable.tolerance = 20
-				MoveToPosTable.draw = false
-				-- MoveToPosTable.draw = true
-				MoveToPosTable.maxage = 0.1
-				MoveToPosTable.repath = 0.1
-
-				-- Your basic move forward key.
-				if ply:KeyDown(IN_FORWARD) and not self.IsStationary then
-					self:ResetSequence(self.WalkAnim)
-					self.loco:SetDesiredSpeed(self.Speed)
-					self:P_MoveToPos(MoveToPosTable, ply, "forward")
-					self:P_PossessorIdle(ply)
-				else
-					-- Your basic move left key.
-					if ply:KeyDown(IN_MOVELEFT) and not self.IsStationary then
-						self:ResetSequence(self.WalkAnim)
-						self.loco:SetDesiredSpeed(self.Speed)
-						self:P_MoveToPos(MoveToPosTable, ply, "left")
-						self:P_PossessorIdle(ply)
-					end
-
-					-- Your basic move right key.
-					if ply:KeyDown(IN_MOVERIGHT) and not self.IsStationary then
-						self:ResetSequence(self.WalkAnim)
-						self.loco:SetDesiredSpeed(self.Speed)
-						self:P_MoveToPos(MoveToPosTable, ply, "right")
-						self:P_PossessorIdle(ply)
-					end
-
-					-- Your basic move back key.
-					if ply:KeyDown(IN_BACK) and not self.IsStationary then
-						self:ResetSequence(self.WalkAnim)
-						self.loco:SetDesiredSpeed(self.Speed)
-						self:P_MoveToPos(MoveToPosTable, ply, "backward")
-						self:P_PossessorIdle(ply)
-					end
-
-					-- Key to bail.
-					if ply:KeyDown(IN_USE) then
-						SafeRemoveEntity(self)
-					end
-
-					-- Your basic attacking key I think?
-					if ply:KeyDown(IN_ATTACK) then
-						self:P_PrimaryAttack(ply)
-					end
-
-					-- Your basic ... Secondary attack whatever.
-					if ply:KeyDown(IN_ATTACK2) then
-						self:P_SecondaryAttack(ply)
-					end
-
-					if ply:KeyDown(IN_JUMP) then
-						self:P_Jump(ply)
-					end
-
-					if ply:KeyDown(IN_SPEED) then
-						self:P_Sprint(ply)
-					end
-
-					if ply:KeyDown(IN_RELOAD) then
-						self:P_Reload(ply)
-					end
-
-					self:P_PossessorIdle(ply)
-				end
-			end
-
-			if self.PossessedWaitTime then
-				coroutine.wait(self.PossessedWaitTime or 2)
-			else
-				coroutine.yield()
-			end
-		else
 			self:CustomRunBehaviour()
 
 			if (self:HaveEnemy()) then
@@ -439,9 +301,7 @@ function ENT:RunBehaviour()
 				self:CustomIdle()
 				self:FindEnemy()
 			end
-
-			coroutine.wait(2)
-		end
+			coroutine.wait(0.1)
 	end
 end
 
@@ -502,7 +362,13 @@ function ENT:ChaseEnemy(option)
 			self.NextIdle = CurTime() + self.IdleNoiseInterval
 		end
 
-		for k, v in pairs(ents.FindInSphere(self:GetPos(), 70)) do
+		for k, v in pairs(ents.FindInSphere(self:GetPos(), 50)) do
+			local dmgSped = v:GetVelocity():Length()
+			if string.find(v:GetClass(), "proj_cw_computer") and dmgSped > 50 and dmgSped > self.health * 5 then
+					self:TakeDamage(v:GetVelocity():Length() / 10, v:GetOwner(), v)
+					print(v:GetVelocity():Length() / 10)
+			end
+
 			if (string.find(v:GetClass(), "prop_combine_ball")) then
 				if not self.ImmuneToCombineBalls then
 					local d = DamageInfo()
@@ -591,7 +457,6 @@ function ENT:OnKilled(dmginfo)
 	if dmginfo:IsDamageType(DMG_DISSOLVE) then
 		self:HandleDissolving(dmginfo)
 	else
-		hook.Call("OnNPCKilled", GAMEMODE, self, dmginfo:GetAttacker(), dmginfo:GetInflictor())
 		self:Helper_BecomeRagdoll(dmginfo, 10)
 		self:CustomKilled(dmginfo)
 	end
@@ -758,7 +623,7 @@ function ENT:CreateRelationShip()
 	if (self.RelationTimer or 0) < CurTime() then
 		local bullseye = self.Bullseye
 
-		if not self:CheckValid(bullseye) then
+		if not IsValid(bullseye) then
 			SafeRemoveEntity(bullseye)
 
 			return
@@ -776,16 +641,6 @@ function ENT:CreateRelationShip()
 
 		self.RelationTimer = CurTime() + 2
 	end
-end
-
-function ENT:CheckValid(ent)
-	if not ent then return false end
-	if not IsValid(self) then return false end
-	if self:Health() < 0 then return false end
-	if not IsValid(ent) then return false end
-	if ent:Health() < 0 then return false end
-
-	return true
 end
 
 -- Helper funcs
@@ -929,24 +784,14 @@ function ENT:FireWeapon()
 	self:FireBullets(bullet)
 end
 
-function ENT:Helper_SafeTimer(delay, func)
-	timer.Simple(delay, function()
-		if not IsValid(self) then return end
-		if not self:CheckValid(self) then return end
-		func()
-	end)
-end
-
 function ENT:Melee_Attack(victim, delay, damage)
 	local v = victim
-	self:CheckValid(v)
+	if not IsValid(v) then return end
 
-	if ((type(v) == "NextBot" or v:IsNPC() or v:IsPlayer()) and (v:Health() > 0)) then
-			timer.Simple(delay, function()
-				self:CheckValid(v)
-				v:TakeDamage(damage, self)
-			end)
-	end
+	timer.Simple(delay, function()
+		if not IsValid(v) then return end
+		v:TakeDamage(damage, self)
+	end)
 end
 
 function ENT:Helper_BecomeRagdoll(dmginfo, time)

@@ -3,6 +3,11 @@ AddCSLuaFile("shared.lua")
 include("shared.lua")
 include("setup.lua")
 util.AddNetworkString("SendReady")
+util.AddNetworkString("RoundEnd")
+
+RunConsoleCommand("ai_ignoreplayers", 1)
+RunConsoleCommand("g_ragdoll_maxcount", 0)
+RunConsoleCommand("g_ragdoll_important_maxcount", 0)
 
 timey = false
 roundInProg = false
@@ -33,7 +38,7 @@ local function AutospawnProps()
 			end
 
 			if v.team then
-				newEnt:SetcwTeam(v.team)
+				newEnt:InitTeam(v.team)
 			end
 
 			if v.class == "cw_spawnbeacon" then
@@ -118,8 +123,8 @@ function EndRound()
 	end
 
 	net.Start("SendReady")
-	net.WriteBool(readyRed)
-	net.WriteBool(readyBlue)
+		net.WriteBool(readyRed)
+		net.WriteBool(readyBlue)
 	net.Broadcast()
 	table.Empty(npcsRed)
 	table.Empty(npcsBlue)
@@ -141,10 +146,9 @@ hook.Add("OnNPCKilled", "NPC Death Function", function(npc, attacker, inflictor)
 				ended = false
 			end)
 			team.AddScore(1, 1)
-
-			for k, v in pairs(player.GetAll()) do
-				v:SendLua("chat.AddText(Color(255,255,255), 'Blue Team has won the round!')")
-			end
+			net.Start("RoundEnd")
+				net.WriteInt(1, 32)
+			net.Broadcast()
 		elseif #npcsBlue < 1 and !ended then
 			ended = true
 			timer.Simple(2, function()
@@ -152,10 +156,9 @@ hook.Add("OnNPCKilled", "NPC Death Function", function(npc, attacker, inflictor)
 				ended = false
 			end)
 			team.AddScore(0, 1)
-
-			for k, v in pairs(player.GetAll()) do
-				v:SendLua("chat.AddText(Color(255,255,255), 'Red Team has won the round!')")
-			end
+			net.Start("RoundEnd")
+				net.WriteInt(0, 32)
+			net.Broadcast()
 		end
 	end
 end)

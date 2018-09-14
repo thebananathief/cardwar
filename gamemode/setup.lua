@@ -1,28 +1,8 @@
 cards = {
   {
-    name = "Combine Soldiers",
-    unique = 0,
-    class = "cw_combinesoldier",
-    hp = 0,
-    icon = "cable/green",
-    desc = "•Moderate Health\n•Moderate Damage\n•Moderate Mobility",
-    quan = 2
-  },
-
-  {
-    name = "Crowbar Dude",
-    unique = 0,
-    class = "cw_crowbardude",
-    hp = 0,
-    icon = "cable/green",
-    desc = "•Moderate Health\n•Moderate Damage\n•High Mobility",
-    quan = 2
-  },
-
-  {
     name = "Doctor Hax",
     unique = 0,
-    class = "cw_drhax",
+    class = "npc_cw_drhax",
     hp = 0,
     icon = "entities/cw_card/drhax.jpg",
     desc = "•High Health\n•High Damage\n•Moderate Mobility",
@@ -169,19 +149,19 @@ MapData = {
       team = 1
     },
     {
-      pos = Vector(0, 500, -83.9),
+      pos = Vector(-3591, -2142, 314),
       team = 0
     },
     {
-      pos = Vector(0, 500, -83.9),
+      pos = Vector(-3591, -2142, 314),
       team = 1
     },
     {
-      pos = Vector(0, 500, -83.9),
+      pos = Vector(945, 5319, 32),
       team = 0
     },
     {
-      pos = Vector(0, 500, -83.9),
+      pos = Vector(945, 5319, 32),
       team = 1
     }
   }

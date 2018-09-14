@@ -1,11 +1,10 @@
-
 ENT.Type = "anim"
 ENT.Base = "base_gmodentity"
 
-ENT.PrintName = "Pedestial"
+ENT.PrintName = "Computer"
 ENT.Author = "TheBananaThief"
-ENT.Instructions = "Place a card on this"
-ENT.Purpose = "Place a card on this"
+ENT.Instructions = ""
+ENT.Purpose = ""
 ENT.Category = "Cardwar"
-ENT.Spawnable = true
+ENT.Spawnable = false
 ENT.AdminSpawnable = false

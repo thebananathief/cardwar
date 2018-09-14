@@ -1,9 +1,6 @@
 AddCSLuaFile("cl_init.lua")
 AddCSLuaFile("shared.lua")
 include("shared.lua")
-RunConsoleCommand("ai_ignoreplayers", 1)
-RunConsoleCommand("g_ragdoll_maxcount", 0)
-RunConsoleCommand("g_ragdoll_important_maxcount", 0)
 
 function ENT:Initialize()
 	self:SetModel("models/props_junk/PopCan01a.mdl")
@@ -17,9 +14,11 @@ function ENT:Initialize()
 		phys:EnableMotion(false)
 	end
 end
-
+function ENT:InitTeam(team)
+	self.Team = team
+end
 function ENT:SpawnTeam()
-	function spawnEnt(class, place)
+	function spawnEnt(class)
 		local offset = Vector(math.random(-200, 200), math.random(-200, 200), 100)
 		local retries = 100
 
@@ -46,9 +45,11 @@ function ENT:SpawnTeam()
 		ent:SetPos(tr.HitPos + Vector(0, 0, 16))
 		ent:SetAngles(self:GetAngles())
 
-		if (self:GetcwTeam() == 0) then
+		if (self.Team == 0) then
+			ent.Team = 0
 			table.insert(npcsRed, ent)
 		else
+			ent.Team = 1
 			table.insert(npcsBlue, ent)
 		end
 
@@ -56,7 +57,7 @@ function ENT:SpawnTeam()
 		ent:Activate()
 	end
 
-	if self:GetcwTeam() == 0 then
+	if self.Team == 0 then
 		for k, v in pairs(loadoutRed) do
 			if v:GetcwQuan() > 1 then
 				for i = 1, v:GetcwQuan() do

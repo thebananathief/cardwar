@@ -9,6 +9,7 @@ function ENT:Initialize()
   self:SetUseType(3)
   self:SetCollisionGroup(11)
   self:DrawShadow(false)
+  self.Team = 0
   local phys = self:GetPhysicsObject()
 
   if (phys:IsValid()) then
@@ -69,7 +70,7 @@ function ENT:PhysicsCollide(data, phys)
     if table.HasValue(loadoutRed, self) then return end
     if table.HasValue(loadoutBlue, self) then return end
 
-    if (ent:GetcwTeam() == 0) then
+    if (ent.Team == 0) then
       table.insert(loadoutRed, self)
     else
       table.insert(loadoutBlue, self)

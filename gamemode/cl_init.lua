@@ -86,3 +86,15 @@ function draw.Circle(x, y, radius, seg)
 
   surface.DrawPoly(cir)
 end
+
+function AnnounceWinner()
+  local win = net.ReadInt(32)
+
+  if win == 0 then
+    chat.AddText(Color(255, 255, 255), "Red Team has won the round!")
+  else
+    chat.AddText(Color(255, 255, 255), "Blue Team has won the round!")
+  end
+end
+
+net.Receive("RoundEnd", AnnounceWinner)
